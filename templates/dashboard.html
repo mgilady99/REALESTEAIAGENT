@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Real Estate Agent Dashboard</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/boxicons@2.0.7/css/boxicons.min.css" rel="stylesheet">
+    <style>
+        .card {
+            transition: transform 0.3s;
+        }
+        .card:hover {
+            transform: translateY(-5px);
+        }
+        .property-card {
+            height: 100%;
+        }
+        .stats-card {
+            background: linear-gradient(45deg, #4158D0, #C850C0);
+            color: white;
+        }
+        .chart-container {
+            height: 300px;
+        }
+    </style>
+</head>
+<body class="bg-light">
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container">
+            <a class="navbar-brand" href="#">Real Estate Agent</a>
+            <button class="btn btn-outline-light" id="runScraperBtn">
+                <i class="bx bx-refresh"></i> Run Scraper
+            </button>
+        </div>
+    </nav>
+
+    <div class="container mt-4">
+        <!-- Stats Cards -->
+        <div class="row mb-4">
+            <div class="col-md-3">
+                <div class="card stats-card">
+                    <div class="card-body">
+                        <h5 class="card-title">Total Properties</h5>
+                        <h2 id="totalProperties">-</h2>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card stats-card">
+                    <div class="card-body">
+                        <h5 class="card-title">Average Price</h5>
+                        <h2 id="avgPrice">-</h2>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card stats-card">
+                    <div class="card-body">
+                        <h5 class="card-title">Average Size</h5>
+                        <h2 id="avgSize">-</h2>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card stats-card">
+                    <div class="card-body">
+                        <h5 class="card-title">Last Update</h5>
+                        <h2 id="lastUpdate">-</h2>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Charts Row -->
+        <div class="row mb-4">
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">Property Types Distribution</h5>
+                        <div class="chart-container">
+                            <canvas id="propertyTypesChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">Top Locations</h5>
+                        <div class="chart-container">
+                            <canvas id="locationsChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Properties Table -->
+        <div class="card mb-4">
+            <div class="card-body">
+                <h5 class="card-title">Latest Properties</h5>
+                <div class="table-responsive">
+                    <table class="table table-hover" id="propertiesTable">
+                        <thead>
+                            <tr>
+                                <th>Type</th>
+                                <th>Location</th>
+                                <th>Price</th>
+                                <th>Size</th>
+                                <th>Source</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        let propertyTypesChart;
+        let locationsChart;
+
+        // Initialize charts
+        function initCharts() {
+            const propertyTypesCtx = document.getElementById('propertyTypesChart').getContext('2d');
+            propertyTypesChart = new Chart(propertyTypesCtx, {
+                type: 'pie',
+                data: {
+                    labels: [],
+                    datasets: [{
+                        data: [],
+                        backgroundColor: [
+                            '#FF6384',
+                            '#36A2EB',
+                            '#FFCE56',
+                            '#4BC0C0',
+                            '#9966FF'
+                        ]
+                    }]
+                }
+            });
+
+            const locationsCtx = document.getElementById('locationsChart').getContext('2d');
+            locationsChart = new Chart(locationsCtx, {
+                type: 'bar',
+                data: {
+                    labels: [],
+                    datasets: [{
+                        label: 'Properties',
+                        data: [],
+                        backgroundColor: '#4158D0'
+                    }]
+                },
+                options: {
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+        }
+
+        // Update dashboard with new data
+        function updateDashboard(data) {
+            // Update stats
+            document.getElementById('totalProperties').textContent = data.analytics.total_properties;
+            document.getElementById('avgPrice').textContent = typeof data.analytics.avg_price === 'number' ? 
+                '₪' + data.analytics.avg_price.toLocaleString() : data.analytics.avg_price;
+            document.getElementById('avgSize').textContent = typeof data.analytics.avg_size === 'number' ? 
+                data.analytics.avg_size.toFixed(1) + ' m²' : data.analytics.avg_size;
+            document.getElementById('lastUpdate').textContent = data.analytics.last_update;
+
+            // Update property types chart
+            const propertyTypes = data.analytics.property_types;
+            propertyTypesChart.data.labels = Object.keys(propertyTypes);
+            propertyTypesChart.data.datasets[0].data = Object.values(propertyTypes);
+            propertyTypesChart.update();
+
+            // Update locations chart
+            const locations = data.analytics.locations;
+            locationsChart.data.labels = Object.keys(locations);
+            locationsChart.data.datasets[0].data = Object.values(locations);
+            locationsChart.update();
+
+            // Update properties table
+            const tableBody = document.querySelector('#propertiesTable tbody');
+            tableBody.innerHTML = '';
+            
+            [...data.facebook, ...data.yad2].slice(0, 10).forEach(property => {
+                const row = tableBody.insertRow();
+                row.innerHTML = `
+                    <td>${property.property_type || 'N/A'}</td>
+                    <td>${property.location || 'N/A'}</td>
+                    <td>${property.price ? '₪' + property.price.toLocaleString() : 'N/A'}</td>
+                    <td>${property.size ? property.size + ' m²' : 'N/A'}</td>
+                    <td>${property.source || 'N/A'}</td>
+                `;
+            });
+        }
+
+        // Run scraper
+        document.getElementById('runScraperBtn').addEventListener('click', async () => {
+            try {
+                const btn = document.getElementById('runScraperBtn');
+                btn.disabled = true;
+                btn.innerHTML = '<i class="bx bx-loader-alt bx-spin"></i> Running...';
+
+                const response = await fetch('/api/run_scraper', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ source: 'all' })
+                });
+
+                const result = await response.json();
+                if (result.status === 'success') {
+                    loadData();
+                } else {
+                    alert('Error: ' + result.message);
+                }
+            } catch (error) {
+                alert('Error running scraper: ' + error);
+            } finally {
+                const btn = document.getElementById('runScraperBtn');
+                btn.disabled = false;
+                btn.innerHTML = '<i class="bx bx-refresh"></i> Run Scraper';
+            }
+        });
+
+        // Load data from API
+        async function loadData() {
+            try {
+                const response = await fetch('/api/data');
+                const data = await response.json();
+                updateDashboard(data);
+            } catch (error) {
+                console.error('Error loading data:', error);
+            }
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            initCharts();
+            loadData();
+            // Refresh data every 5 minutes
+            setInterval(loadData, 5 * 60 * 1000);
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,144 @@
+# Israeli Commercial Real Estate Configuration
+
+websites:
+  yad2_commercial:
+    name: "Yad2 Commercial"
+    enabled: true
+    base_url: "https://www.yad2.co.il"
+    search_path: "/realestate/commercial"
+    selectors:
+      listings: ".feeditem"
+      title: ".title"
+      price: ".price"
+      size: ".square_meters"
+      location: ".subtitle"
+      property_type: ".property_type"
+      description: ".details"
+      contact_info: ".contact-info"
+      link: "a.feed_item"
+    property_types:
+      - "משרדים"  # Offices
+      - "חנויות"  # Shops
+      - "מסחרי"   # Commercial
+      - "מחסנים"  # Warehouses
+      - "תעשייה"  # Industrial
+      - "בנין"    # Building
+
+  nadlan_commercial:
+    name: "Nadlan Commercial"
+    enabled: true
+    base_url: "https://nadlan.gov.il"
+    search_path: "/commercial"
+    selectors:
+      listings: ".property-item"
+      title: ".property-title"
+      price: ".property-price"
+      size: ".property-size"
+      location: ".property-location"
+      property_type: ".property-type"
+      description: ".property-description"
+      contact_info: ".contact-details"
+      link: ".property-link"
+    property_types:
+      - "משרד"     # Office
+      - "מסחרי"    # Commercial
+      - "תעשייתי"  # Industrial
+      - "מחסן"     # Warehouse
+      - "עסק"      # Business
+
+  # Add your custom commercial sites here
+  custom_sites:
+    enabled: true
+    sites: []
+      # Example format:
+      # - name: "Your Commercial Site"
+      #   base_url: "https://example.com"
+      #   search_path: "/commercial"
+      #   selectors:
+      #     listings: ".commercial-listing"
+      #     title: ".title-class"
+      #     price: ".price-class"
+      #     size: ".size-class"
+      #     location: ".location-class"
+      #     property_type: ".type-class"
+      #     description: ".description-class"
+      #     contact_info: ".contact-class"
+      #     link: ".link-class"
+      #   property_types:
+      #     - "משרדים"
+      #     - "מסחרי"
+
+  facebook_groups:
+    name: "Commercial Real Estate Groups"
+    enabled: true
+    groups:
+      - name: "נדל''ן מסחרי בישראל"
+        url: "https://www.facebook.com/groups/commercial.realestate.israel"
+      - name: "משרדים להשכרה ומכירה"
+        url: "https://www.facebook.com/groups/office.space.israel"
+      - name: "נדל''ן מסחרי תל אביב"
+        url: "https://www.facebook.com/groups/tlv.commercial"
+      - name: "חנויות ומסחר בישראל"
+        url: "https://www.facebook.com/groups/retail.space.israel"
+    
+    # Your custom commercial groups
+    custom_groups: []
+      # Example format:
+      # - name: "Your Commercial Group"
+      #   url: "https://www.facebook.com/groups/your-group-id"
+      #   property_types:
+      #     - "משרדים"
+      #     - "מסחרי"
+
+settings:
+  request_delay: 2
+  max_retries: 3
+  timeout: 30
+  user_agent: "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36"
+
+commercial_property_types:
+  office:
+    hebrew: ["משרד", "משרדים"]
+    english: ["office", "offices"]
+  retail:
+    hebrew: ["חנות", "חנויות", "מסחרי"]
+    english: ["retail", "shop", "commercial"]
+  industrial:
+    hebrew: ["תעשייה", "תעשייתי", "מפעל"]
+    english: ["industrial", "factory"]
+  warehouse:
+    hebrew: ["מחסן", "מחסנים"]
+    english: ["warehouse", "storage"]
+  business:
+    hebrew: ["עסק", "עסקים"]
+    english: ["business"]
+  building:
+    hebrew: ["בניין", "מבנה"]
+    english: ["building", "structure"]
+
+proxy_settings:
+  enabled: false
+  proxy_list: []
+  rotate_every: 10
+
+facebook_settings:
+  max_posts_per_group: 50
+  scroll_pause_time: 2
+  login_required: true
+  commercial_keywords:
+    - "מסחרי"
+    - "משרדים"
+    - "חנות"
+    - "מחסן"
+    - "תעשייה"
+    - "עסק"
+    - "בניין"
+    - "מבנה"
+  exclude_keywords:
+    - "דירה"
+    - "דירות"
+    - "בית"
+    - "וילה"
+    - "פנטהאוז"
+    - "דיור"
+    - "מגורים"

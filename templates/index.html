@@ -1,0 +1,162 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - Real Estate AI Agent{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-6 mb-4">
+        <div class="card h-100">
+            <div class="card-body">
+                <h5 class="card-title">Recent Properties</h5>
+                <div id="recent-properties" class="list-group list-group-flush">
+                    <div class="text-center">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-6 mb-4">
+        <div class="card h-100">
+            <div class="card-body">
+                <h5 class="card-title">Statistics</h5>
+                <div id="statistics">
+                    <div class="row">
+                        <div class="col-6 mb-3">
+                            <div class="border rounded p-3 text-center">
+                                <h6>Total Properties</h6>
+                                <h3 id="total-properties">-</h3>
+                            </div>
+                        </div>
+                        <div class="col-6 mb-3">
+                            <div class="border rounded p-3 text-center">
+                                <h6>New Today</h6>
+                                <h3 id="new-today">-</h3>
+                            </div>
+                        </div>
+                        <div class="col-6 mb-3">
+                            <div class="border rounded p-3 text-center">
+                                <h6>Active Criteria</h6>
+                                <h3 id="active-criteria">-</h3>
+                            </div>
+                        </div>
+                        <div class="col-6 mb-3">
+                            <div class="border rounded p-3 text-center">
+                                <h6>Last Update</h6>
+                                <h3 id="last-update">-</h3>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">Quick Actions</h5>
+                <div class="row">
+                    <div class="col-md-3 mb-3">
+                        <a href="/properties" class="btn btn-primary w-100">
+                            <i class="bx bx-list-ul"></i> View All Properties
+                        </a>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <a href="/search-criteria" class="btn btn-success w-100">
+                            <i class="bx bx-plus"></i> Add Search Criteria
+                        </a>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <button onclick="startScraping()" class="btn btn-info w-100">
+                            <i class="bx bx-refresh"></i> Start Scraping
+                        </button>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <a href="/export-properties" class="btn btn-secondary w-100">
+                            <i class="bx bx-download"></i> Export Data
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+async function loadRecentProperties() {
+    try {
+        const response = await fetch('/api/properties');
+        const properties = await response.json();
+        const container = document.getElementById('recent-properties');
+        
+        if (properties.length === 0) {
+            container.innerHTML = '<p class="text-center">No properties found</p>';
+            return;
+        }
+
+        const html = properties.slice(0, 5).map(p => `
+            <a href="${p.url}" target="_blank" class="list-group-item list-group-item-action">
+                <div class="d-flex w-100 justify-content-between">
+                    <h6 class="mb-1">${p.title}</h6>
+                    <small class="text-muted">$${p.price.toLocaleString()}</small>
+                </div>
+                <p class="mb-1">${p.location}</p>
+                <small class="text-muted">
+                    ${p.property_type} | ${p.size} sqft | 
+                    Added: ${new Date(p.date_scraped).toLocaleDateString()}
+                </small>
+            </a>
+        `).join('');
+
+        container.innerHTML = html;
+    } catch (error) {
+        console.error('Error loading properties:', error);
+    }
+}
+
+async function loadStatistics() {
+    try {
+        const response = await fetch('/api/statistics');
+        const stats = await response.json();
+        
+        document.getElementById('total-properties').textContent = stats.total_properties;
+        document.getElementById('new-today').textContent = stats.new_today;
+        document.getElementById('active-criteria').textContent = stats.active_criteria;
+        document.getElementById('last-update').textContent = 
+            new Date(stats.last_update).toLocaleTimeString();
+    } catch (error) {
+        console.error('Error loading statistics:', error);
+    }
+}
+
+async function startScraping() {
+    try {
+        const response = await fetch('/api/start-scraping', { method: 'POST' });
+        const result = await response.json();
+        alert(result.message);
+    } catch (error) {
+        console.error('Error starting scraper:', error);
+        alert('Error starting scraper. Please check the logs.');
+    }
+}
+
+// Load data when page loads
+document.addEventListener('DOMContentLoaded', () => {
+    loadRecentProperties();
+    loadStatistics();
+    // Refresh data every 5 minutes
+    setInterval(() => {
+        loadRecentProperties();
+        loadStatistics();
+    }, 300000);
+});
+</script>
+{% endblock %}
