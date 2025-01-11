@@ -1,9 +1,11 @@
 services:
   - type: web
     name: realestate-ai-agent
-    env: python
+    plan: free
+    runtime: python
     buildCommand: pip install -r requirements.txt
-    startCommand: gunicorn app:app --config gunicorn_config.py
+    startCommand: python app.py
+    autoDeploy: false
     envVars:
       - key: PYTHON_VERSION
         value: 3.9.0
