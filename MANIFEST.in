@@ -1,0 +1,7 @@
+include requirements.txt
+include runtime.txt
+include render.yaml
+include *.py
+recursive-include scrapers *.py
+recursive-include templates *
+recursive-include static *

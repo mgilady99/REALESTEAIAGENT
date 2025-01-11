@@ -1,14 +1,20 @@
 services:
   - type: web
-    name: realestate-ai-agent
+    name: realestate-scraper
+    env: python
     plan: free
-    runtime: python
-    buildCommand: pip install -r requirements.txt
-    startCommand: python app.py
+    buildCommand: |
+      pip install -r requirements.txt
+      python -c "import os; open('__init__.py', 'a').close()"
+    startCommand: |
+      export PYTHONPATH=/opt/render/project/src:$PYTHONPATH
+      gunicorn app:app
     autoDeploy: false
     envVars:
       - key: PYTHON_VERSION
-        value: 3.9.0
+        value: 3.11.0
+      - key: PYTHONPATH
+        value: /opt/render/project/src
       - key: GOOGLE_SHEETS_CREDENTIALS
         sync: false
       - key: SPREADSHEET_ID

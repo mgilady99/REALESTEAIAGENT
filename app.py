@@ -3,6 +3,7 @@ from flask_sqlalchemy import SQLAlchemy
 from apscheduler.schedulers.background import BackgroundScheduler
 from datetime import datetime
 import os
+import asyncio
 from scraper import RealEstateScraper
 from models import db, Property, SearchCriteria, ScrapingLog
 from sheets_handler import GoogleSheetsHandler
@@ -11,8 +12,6 @@ from config import Config
 
 app = Flask(__name__)
 app.config.from_object(Config)
-
-# Initialize extensions
 db.init_app(app)
 
 def init_db():
